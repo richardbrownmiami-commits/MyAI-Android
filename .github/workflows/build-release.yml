@@ -1,4 +1,4 @@
-name: Build & Release APK
+name: Build & Release Signed APK
 
 on:
   push:
@@ -23,24 +23,56 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Generate Keystore
+        run: |
+          keytool -genkeypair \
+            -keystore keystore.jks \
+            -alias "${KEY_ALIAS}" \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass "${KEY_STORE_PASSWORD}" \
+            -keypass "${KEY_PASSWORD}" \
+            -dname "CN=MyAI, OU=Dev, O=BrainForge, L=Unknown, ST=Unknown, C=US"
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'myai' }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD || 'brainforge2026' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'brainforge2026' }}
+
       - name: Build Release APK
         run: ./gradlew assembleRelease
         env:
           ORG_GRADLE_PROJECT_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'myai' }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD || 'brainforge2026' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'brainforge2026' }}
 
-      - name: Upload APK artifact
+      - name: Rename signed APK
+        run: |
+          mkdir -p app/build/outputs/apk/release/signed
+          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/signed/MyAI-Android-signed.apk || \
+          cp app/build/outputs/apk/release/*.apk app/build/outputs/apk/release/signed/MyAI-Android-signed.apk
+
+      - name: Upload Signed APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MyAI-Android-APK
-          path: app/build/outputs/apk/release/*.apk
+          name: MyAI-Android-Signed-APK
+          path: app/build/outputs/apk/release/signed/MyAI-Android-signed.apk
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/release/*.apk
+          files: app/build/outputs/apk/release/signed/MyAI-Android-signed.apk
           name: "MyAI Android ${{ github.ref_name }}"
-          body: "New release — download APK below to update."
+          body: |
+            ## MyAI Android ${{ github.ref_name }}
+            
+            Download the signed APK below to install on your Android device.
+            
+            **Install steps:**
+            1. Download APK
+            2. Enable "Install unknown apps" in Settings if prompted
+            3. Tap the downloaded file to install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
