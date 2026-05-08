@@ -16,24 +16,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        val geminiKey = System.getenv("ORG_GRADLE_PROJECT_GEMINI_API_KEY")
-            ?: project.findProperty("GEMINI_API_KEY")?.toString()
-            ?: ""
-        buildConfigField("String", "GEMINI_API_KEY", "\"${geminiKey}\"")
-    }
-
-    signingConfigs {
-        create("release") {
-            storeFile = file("../keystore.jks")
-            storePassword = System.getenv("KEY_STORE_PASSWORD") ?: "brainforge2026"
-            keyAlias = System.getenv("KEY_ALIAS") ?: "myai"
-            keyPassword = System.getenv("KEY_PASSWORD") ?: "brainforge2026"
-        }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -47,14 +33,13 @@ android {
     }
     buildFeatures {
         viewBinding = true
-        buildConfig = true
     }
 }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // Room Database
@@ -63,8 +48,8 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
 
-    // WorkManager - for background auto-response scheduling
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     // WebSocket (OkHttp)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -76,4 +61,3 @@ dependencies {
     // JSON
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 }
-

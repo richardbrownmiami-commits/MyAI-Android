@@ -22,7 +22,7 @@ class ProactiveService : Service(), GeminiClient.GeminiListener {
         super.onCreate()
         createNotificationChannel()
         initAudioTrack()
-        geminiClient = GeminiClient(BuildConfig.GEMINI_API_KEY, this)
+        geminiClient = GeminiClient("AIzaSyCTmvXRgUm_4IDUnpJzFzXMf8JukP3rB-Y", this)
         geminiClient.connect()
     }
 
@@ -127,4 +127,3 @@ class ProactiveService : Service(), GeminiClient.GeminiListener {
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
-

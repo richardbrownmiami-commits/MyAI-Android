@@ -9,8 +9,6 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.example.myai.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
 import org.json.JSONObject
@@ -35,10 +33,7 @@ class MainActivity : AppCompatActivity(), GeminiClient.GeminiListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Check for app updates and show banner if available
-        UpdateBannerHelper.showIfUpdateAvailable(this, binding.root, activityScope)
-
-        geminiClient = GeminiClient(BuildConfig.GEMINI_API_KEY, this)
+        geminiClient = GeminiClient("AIzaSyCTmvXRgUm_4IDUnpJzFzXMf8JukP3rB-Y", this)
         geminiClient.connect()
 
         binding.micButton.setOnClickListener {
@@ -92,14 +87,12 @@ class MainActivity : AppCompatActivity(), GeminiClient.GeminiListener {
         runOnUiThread {
             binding.aiResponseText.text = text
         }
-        // Schedule auto-response notification via WorkManager
-        scheduleAutoResponse(text)
     }
 
     override fun onAudioData(data: ByteArray) {
-        // Audio is handled by the ProactiveService if it is running,
-        // or we could add a local AudioTrack here if the service is not used for manual triggers.
-        // For simplicity, let us assume the service handles all audio output.
+        // Audio is handled by the ProactiveService if it's running, 
+        // or we could add a local AudioTrack here if the service isn't used for manual triggers.
+        // For simplicity, let's assume the service handles all audio output.
     }
 
     override fun onToolCall(name: String, args: JSONObject) {
@@ -127,22 +120,9 @@ class MainActivity : AppCompatActivity(), GeminiClient.GeminiListener {
         }
     }
 
-    /**
-     * Saves the Gemini response to SharedPreferences and enqueues a WorkManager task
-     * so a notification is shown even if the app moves to the background.
-     */
-    private fun scheduleAutoResponse(responseText: String) {
-        val prefs = getSharedPreferences("myai_prefs", MODE_PRIVATE)
-        prefs.edit().putString("pending_auto_response", responseText).apply()
-
-        val workRequest = OneTimeWorkRequestBuilder<AutoResponseWorker>().build()
-        WorkManager.getInstance(this).enqueue(workRequest)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         geminiClient.disconnect()
         activityScope.cancel()
     }
 }
-
