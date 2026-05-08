@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.myai.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
 import org.json.JSONObject
@@ -90,6 +92,8 @@ class MainActivity : AppCompatActivity(), GeminiClient.GeminiListener {
         runOnUiThread {
             binding.aiResponseText.text = text
         }
+        // Schedule auto-response notification via WorkManager
+        scheduleAutoResponse(text)
     }
 
     override fun onAudioData(data: ByteArray) {
@@ -121,6 +125,18 @@ class MainActivity : AppCompatActivity(), GeminiClient.GeminiListener {
         runOnUiThread {
             binding.statusText.text = "Error: $message"
         }
+    }
+
+    /**
+     * Saves the Gemini response to SharedPreferences and enqueues a WorkManager task
+     * so a notification is shown even if the app moves to the background.
+     */
+    private fun scheduleAutoResponse(responseText: String) {
+        val prefs = getSharedPreferences("myai_prefs", MODE_PRIVATE)
+        prefs.edit().putString("pending_auto_response", responseText).apply()
+
+        val workRequest = OneTimeWorkRequestBuilder<AutoResponseWorker>().build()
+        WorkManager.getInstance(this).enqueue(workRequest)
     }
 
     override fun onDestroy() {
