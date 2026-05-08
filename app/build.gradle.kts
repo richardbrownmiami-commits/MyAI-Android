@@ -17,11 +17,21 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val geminiKey = project.findProperty("GEMINI_API_KEY")?.toString() ?: ""
-        buildConfigField("String", "GEMINI_API_KEY", "\"" + geminiKey + "\"")
+        buildConfigField("String", "GEMINI_API_KEY", """ + geminiKey + """)
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("../keystore.jks")
+            storePassword = System.getenv("KEY_STORE_PASSWORD") ?: "brainforge2026"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "myai"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "brainforge2026"
+        }
     }
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
