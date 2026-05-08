@@ -43,7 +43,7 @@ class GeminiClient(
     private fun sendSetup() {
         val setup = JSONObject().apply {
             put("setup", JSONObject().apply {
-                put("model", "models/gemini-2.0-flash-exp") // Note: Using the latest available flash model for Live
+                put("model", "models/gemini-2.0-flash-live-001") // Gemini 2.0 Flash Live stable model
                 put("generation_config", JSONObject().apply {
                     put("response_modalities", "audio")
                 })
@@ -133,3 +133,4 @@ class GeminiClient(
         webSocket?.close(1000, "Normal closure")
     }
 }
+
