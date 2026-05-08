@@ -63,8 +63,8 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
 
-    // WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    // WorkManager - for background auto-response scheduling
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     // WebSocket (OkHttp)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -76,3 +76,4 @@ dependencies {
     // JSON
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 }
+
